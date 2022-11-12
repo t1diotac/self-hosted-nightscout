@@ -62,6 +62,7 @@ services:
       # For all other settings, please refer to the Environment section of the README
       # https://github.com/nightscout/cgm-remote-monitor#environment
 
+# https://hub.docker.com/r/cloudflare/cloudflared
   cloudflared:
     container_name: cloudflared
     image: cloudflare/cloudflared
