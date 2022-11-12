@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:4.4
+    restart: always
+    container_name: mongo
+    volumes:
+      - ${NS_MONGO_DATA_DIR:-./mongo-data}:/data/db:cached
+
+  nightscout:
+    image: nightscout/cgm-remote-monitor:latest
+    container_name: nightscout
+    restart: always
+    ports: 
+      - 80:1337
+    depends_on:
+      - mongo
+    env_file: .env
+    environment:
+      ### Variables for the Nightscout container
+      NODE_ENV: production
+
+      ### Overridden variables for Docker Compose setup
+      # The `nightscout` service can use HTTP, because we use `cloudflared` to serve the HTTPS
+      # and manage TLS certificates
+      INSECURE_USE_HTTP: 'true'
+
+      # For all other settings, please refer to the Environment section of the README
+      ### Required variables
+      # MONGO_CONNECTION - The connection string for your Mongo database.
+      # Something like mongodb://sally:sallypass@ds099999.mongolab.com:99999/nightscout
+      # The default connects to the `mongo` included in this docker-compose file.
+      # If you change it, you probably also want to comment out the entire `mongo` service block
+      # and `depends_on` block above.
+      MONGO_CONNECTION: mongodb://mongo:27017/nightscout
+
+      # API_SECRET - A secret passphrase that must be at least 12 characters long.
+      API_SECRET: ${NS_API_SECRET}
+
+      ### Features
+      # ENABLE - Used to enable optional features, expects a space delimited list, such as: careportal rawbg iob
+      # See https://github.com/nightscout/cgm-remote-monitor#plugins for details
+      ENABLE: ${NS_PLUGINS}
+
+      BRIDGE_USER_NAME: ${NS_BRIDGE_USERNAME}
+      BRIDGE_PASSWORD: ${NS_BRIDGE_PASSWORD}
+
+      # AUTH_DEFAULT_ROLES (readable) - possible values readable, denied, or any valid role name.
+      # When readable, anyone can view Nightscout without a token. Setting it to denied will require
+      # a token from every visit, using status-only will enable api-secret based login.
+      AUTH_DEFAULT_ROLES: denied
+
+      # Additional preferred environment settings
+      TIME_FORMAT: 24
+      TIMEZONE: ${NS_TIMEZONE} 
+      THEME: "colors"
+      NIGHT_MODE: "on"
+      CUSTOM_TITLE: ${NS_SITE_NAME}
+      SHOW_FORECAST: "false"
+
+      # For all other settings, please refer to the Environment section of the README
+      # https://github.com/nightscout/cgm-remote-monitor#environment
+
+  cloudflared:
+    container_name: cloudflared
+    image: cloudflare/cloudflared
+    env_file: .env
+    command: tunnel --no-autoupdate run --token ${CF_TOKEN}

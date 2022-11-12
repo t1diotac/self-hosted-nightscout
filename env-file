@@ -1,0 +1,16 @@
+# Rename this file to .env in the same directory as your docker-compose.yml file. Replace/update lines below for your needs.
+
+# Nightscout Settings
+# NS_PLUGINS="careportal basal dbsize rawbg iob maker cob bwp cage iage sage boluscalc pushover treatmentnotify loop pump profile food openaps bage alexa override speech cors bridge"
+NS_PLUGINS="careportal iob bridge sage cage"
+NS_API_SECRET="FifteenOrMoreCharacterSecret123"
+NS_SITE_NAME="NameInUpperLeft"
+NS_TIMEZONE="US/Eastern"
+
+#Dexcom Bridge Settings
+NS_BRIDGE_USERNAME="DexcomUsername"
+NS_BRIDGE_PASSWORD="DexcomPassword"
+
+# Cloudflare Settings
+CF_TOKEN=
+#CF_TOKEN=TheSuperDuperLongStringOfLettersAndNumbersFromYourTunnelOnCloudflareOneDashboard
